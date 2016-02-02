@@ -3,15 +3,17 @@ VFD=FDimage
 
 as86 -o ts.o ts.s
 bcc  -c -ansi t.c
-ld86 -d -o mtx ts.o t.o mtxlib /usr/lib/bcc/libc.a
+bcc  -c -ansi io.c
+ld86 -d -o mtx ts.o t.o io.o mtxlib /usr/lib/bcc/libc.a
 
-echo mount $VFD on /mnt
-sudo mount -o loop $VFD /mnt
+echo mount $VFD on mnt
+sudo mount  FDimage mnt
+#sudo mount -o loop FDimage mnt
 
-rm /mnt/boot/*
+rm mnt/boot/*
 
-cp mtx /mnt/boot
-umount /mnt
+cp mtx mnt/boot
+umount mnt
 
 echo ready to go?
 read dummy

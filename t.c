@@ -1,29 +1,40 @@
 #define NPROC 9                // number of PROCs
 #define SSIZE 1024             // per proc stack area 
-#define RED 
+
+#define FREE   0
+#define READY  1
+#define SLEEP  2
+#define BLOCK  3
+#define ZOMBIE 4
 
 typedef struct proc{
-    struct proc *next;
-    int    *ksp;               // saved ksp when not running
-    int    pid;                // add pid for identify the proc
-    int    kstack[SSIZE];      // proc stack area
+   struct proc *next;
+   int    *ksp;               // saved ksp when not running
+                              // 0  |  1  |  2  |  3  |  4
+   int status;                //FREE|READY|SLEEP|BLOCK|ZOMBIE  
+   int priority;              
+   int pid;                   //pid 
+   int ppid;                  //parent pid
+   struct proc *parent;       //pointer to parent process
+   int    kstack[SSIZE];      // proc stack area
 }PROC;
 
 int  procSize = sizeof(PROC);
 
-PROC proc[NPROC], *running;    // define NPROC procs
+PROC proc[NPROC], *running, *freeList, *readyQueue;    // define NPROC procs
 extern int color;
 
-int body()
+int body(void)
 { 
-   char c;
+        char c;
    printf("proc %d resumes to body()\n", running->pid);
-   while(1){
-     color = running->pid + 7;
-     printf("proc %d running : enter a key : ", running->pid);
-     c = getc(); 
-     printf("%c\n", c);
-     tswitch();
+   while(1)
+   {
+      color = running->pid + 7;
+      printf("proc %d running : enter a key : ", running->pid);
+      c = getc(); 
+      printf("%c\n", c);
+      tswitch();
    }
 }
 
@@ -33,23 +44,38 @@ int init()
    int i, j;
 
    /* initialize all proc's */
-   for (i=0; i<NPROC; i++){
-       p = &proc[i];
-       p->pid = i;                        // pid = 0,1,2,..NPROC-1
-       p->next = &proc[i+1];              // point to next proc
-       if (i){                            // not for P0
-          p->kstack[SSIZE-1] = (int)body; // entry address of body()
-          for (j=2; j<10; j++)            // kstack[ ] high end entries = 0
+   for (i=0; i<NPROC; i++)
+   {  
+      p = &proc[i];
+
+      p->status = FREE;
+      p->pid = i;
+      p->priority = 0;
+      p->ppid = 0; 
+      p->parent = 0;
+      p->next = &proc[i+1];              // point to next proc
+      if (i)                             // not for P0
+      {
+         p->kstack[SSIZE-1] = (int)body; // entry address of body()
+         for (j=2; j<10; j++)            // kstack[ ] high end entries = 0
+         {
                p->kstack[SSIZE-j] = 0;
-          p->ksp = &(p->kstack[SSIZE-9]);
-       }
+         }
+         p->ksp = &(p->kstack[SSIZE-9]);
+      }
    }
    proc[NPROC-1].next = &proc[0];         // all procs form a circular link list
 
    running = &proc[0];                    // P0 is running 
-
+   running->status = READY;               // P0 is READY
+   running->parent = &proc[0];
+   
+   // set up free list  
+   freeList = &proc[1];                   // freeList P1->P2->...->P8->0
+   
+   readyQueue = 0;
    printf("init complete\n");
- }
+}
    
 int scheduler()
 {
@@ -58,12 +84,13 @@ int scheduler()
 
 main()
 {
-  printf("MTX starts in main()\n");
-  init();
-  while(1){
-    printf("proc 0  running : enter a key : \n");
-    getc();
-    tswitch();
-  }
+   printf("MTX starts in main()\n");
+   init();
+   while(1)  
+   {
+      printf("proc 0  running : enter a key : \n");
+      getc();
+      tswitch();
+   }
 }
 

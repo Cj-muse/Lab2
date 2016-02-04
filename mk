@@ -1,19 +1,20 @@
 #!/bin/bash
-VFD=FDimage
-
+#VFD=FDimage
 as86 -o ts.o ts.s
 bcc  -c -ansi t.c
 bcc  -c -ansi io.c
 ld86 -d -o mtx ts.o t.o io.o mtxlib /usr/lib/bcc/libc.a
 
-echo mount $VFD on mnt
-sudo mount  FDimage mnt
+echo mount mtximage on mnt
+sudo mount -o loop mtximage mnt
+#echo mount $VFD on mnt
+#sudo mount VFD mnt
 #sudo mount -o loop FDimage mnt
 
-rm mnt/boot/*
+sudo rm mnt/boot/*
 
-cp mtx mnt/boot
-umount mnt
+sudo cp mtx mnt/boot
+sudo umount mnt
 
 echo ready to go?
 read dummy

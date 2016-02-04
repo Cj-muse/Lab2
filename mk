@@ -19,5 +19,5 @@ sudo umount mnt
 echo ready to go?
 read dummy
 
-qemu-system-x86_64 -fda FDimage -no-fd-bootchk
+qemu-system-x86_64 -fda mtximage -no-fd-bootchk
 

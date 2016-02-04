@@ -27,7 +27,7 @@ extern int color;
 int body(void)
 { 
         char c;
-   printf("proc %d resumes to body()\n", running->pid);
+   printf("proc %d resumes to body()\n\r", running->pid);
    while(1)
    {
       color = running->pid + 7;
@@ -74,9 +74,47 @@ int init()
    freeList = &proc[1];                   // freeList P1->P2->...->P8->0
    
    readyQueue = 0;
-   printf("init complete\n");
+   printf("init complete\n\r");
+}
+
+int kfork()
+{
+
+}
+
+PROC *get_proc(PROC **list)     // e.g. get_proc(&freeList); 
+{
+   PROC *templist = *list;
+   PROC *tempproc = *templist;
+
+   // get a FREE PROC from *list; 
+   while (tempproc)
+   {
+      if (temp->status == FREE)
+      {
+         printf("found FREE proc\n\r");
+         return temp;   // return FREE pointer
+      }
+      tempproc = tempproc->next;
+   }
+   printf("No FREE proc available\n\r");
+   return 0;  // return 0 if no more FREE PROCs
 }
    
+int put_proc(PROC **list, PROC *p)  // e.g. put_proc(&freeList, p);
+{
+   PROC *temp = *list;
+
+   while(temp->next)
+   {
+      
+   }
+   // enter p into *list;
+   temp->next = p; // enter p into *list;
+   p->parent = temp;
+   
+}   
+
 int scheduler()
 {
    running = running->next;
@@ -84,11 +122,11 @@ int scheduler()
 
 main()
 {
-   printf("MTX starts in main()\n");
+   printf("MTX starts in main()\n\r");
    init();
    while(1)  
    {
-      printf("proc 0  running : enter a key : \n");
+      printf("proc 0  running : enter a key : \n\r");
       getc();
       tswitch();
    }

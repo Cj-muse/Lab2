@@ -2,8 +2,9 @@
 #VFD=FDimage
 as86 -o ts.o ts.s
 bcc  -c -ansi t.c
+bcc  -c -ansi queue.c
 bcc  -c -ansi io.c
-ld86 -d -o mtx ts.o t.o io.o mtxlib /usr/lib/bcc/libc.a
+ld86 -d -o mtx ts.o t.o io.o queue.o mtxlib /usr/lib/bcc/libc.a
 
 echo mount mtximage on mnt
 sudo mount -o loop mtximage mnt

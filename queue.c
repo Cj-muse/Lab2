@@ -3,11 +3,16 @@
 PROC *get_proc(PROC **list)     // e.g. get_proc(&freeList); 
 {
    PROC *procptr = *list;
-   PROC *temp = procptr;
+   
+   printf("::get_proc::\n\r");
+   printList("somelist", *list);
+
+   return procptr;
 
 	// get a FREE PROC from *list; 
-   while (temp)
+   /*while (temp)
    {
+      printf("within get_proc while\r\n");
       if (temp->status == FREE)
       {
          printf("found FREE proc\n\r");
@@ -16,12 +21,12 @@ PROC *get_proc(PROC **list)     // e.g. get_proc(&freeList);
 			temp->parent->next = temp->next;
 
 			// set temps fields back to null
-			//temp->next = NULL;
-			//temp->parent = NULL;
+			temp->next = 0;
+			temp->parent = 0;
          return temp;   // return FREE pointer
       }
       temp = temp->next;
-   }
+   }*/
    printf("No FREE proc available\n\r");
    return 0;  // return 0 if no more FREE PROCs
 }
@@ -36,25 +41,33 @@ int put_proc(PROC **list, PROC *p)  // e.g. put_proc(&freeList, p);
    }
    // enter p into *list;
    temp->next = p; // enter p into *list;
-   p->parent = temp;
+   p->status = FREE;  
    return 0;
 }   
 
 int enqueue(PROC **queue, PROC *p) //: enter p into queue by priority
 {
 	PROC *proc = *queue;
-	printf(":::Enqueue:::\n\r");
+
+	printf(":::Enqueue for proc %d:::\n\r", p->pid);
+   printf("printing queue\n\r");
+   printList("queue", *queue);
 
 	//check for empty queue
 	if (!proc)
 	{
 		// insert p as first proc
+      p->next = (*queue)->next;
+      p->parent = (*queue)->parent;
 		*queue = p;
+      printf("Enqueued proc %d\r\n", p->pid);
+      return 1;
 	}
 
 	// make sure that we are not at the end of the queue
-	while (proc->next)
+	while (proc->pid < NPROC-1)
 	{
+      printf("enqueue while\n\r");
 		if(p->priority > proc->priority)	// Highest priority first 
 		{
 			// insert p
@@ -70,6 +83,7 @@ int enqueue(PROC **queue, PROC *p) //: enter p into queue by priority
 	}
 	
 	// p is the lowest priority so place on end of queue
+   printf("Proc is lowest priority: %d\n\r",p->priority);
 	p->next = proc->next;
 	p->parent = proc;
 	proc->next = p;
@@ -87,16 +101,18 @@ PROC *dequeue(PROC **queue) //: return first element removed from queue
 	return proc;
 }
 
-printList(char *name, PROC *list) //: print name=list contents
+int printList(char *name, PROC *list) //: print name=list contents
 {
 	/* print the queue entries in the form of [pid, prioirty]-> ... ->NULL*/
+   int count = 0;
 	printf("List: %s\n\r", name);
-	
-	while (list)
+
+	while (list && (count < NPROC))
 	{
 		printf("[%d, %d]->", list->pid, list->priority);
+      list = list->next;
+      count++;
 	}
 	printf("NULL\n\r");
 }
-
 

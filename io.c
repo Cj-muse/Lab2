@@ -10,7 +10,16 @@ int rpu(u32 x)
       putc(c);
     }
 } 
-
+int rpu16(u16 x)
+{
+  char c;
+  if (x)
+    {
+      c = table[x % BASE];
+      rpu16(x / BASE);
+      putc(c);
+    }
+} 
 int printu(u32 x)
 {
   if (x==0)
@@ -26,7 +35,7 @@ int printd(int x) //prints an integer
     putc('0');
   else
    BASE = 10;
-   rpu(x); 
+   rpu16(x); 
 }
 
 int printo(u32 x) //prints x in OCTal

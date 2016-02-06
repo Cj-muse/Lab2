@@ -1,5 +1,8 @@
 #include "io.h"
 //#include "queue.c"
+int myExit()
+{
+}
 int body(void)
 { 
 	char c;
@@ -13,8 +16,9 @@ int body(void)
 		switch(c)
 		{
 			case 's': tswitch();	break;
-			case 'q': exit();		break;
+			case 'q': myExit();		break;
 			case 'f': kfork();	break;
+         default: break;
 		}
    }
 }
@@ -25,7 +29,7 @@ PROC *kfork()
 	
 	if (!p)
 	{
-		printf("no more PROC, kfork() failed\n");
+		printf("no more PROC, kfork() failed\n\r");
 		return 0;
 	}
 	
@@ -54,6 +58,7 @@ int init()
    /* initialize all proc's */
    for (i=0; i<NPROC; i++)
    {  
+      printf("init P%d \n\r",i);
       p = &proc[i];
 
       p->status = FREE;
@@ -72,7 +77,7 @@ int init()
          p->ksp = &(p->kstack[SSIZE-9]);
       }
    }
-   proc[NPROC-1].next = &proc[0];         // all procs form a circular link list
+   proc[NPROC-1].next = 0;//&proc[0];         // all procs form a circular link list
 
    running = &proc[0];                    // P0 is running 
    running->status = READY;               // P0 is READY
@@ -80,7 +85,7 @@ int init()
    
    // set up free list  
    freeList = &proc[1];                   // freeList P1->P2->...->P8->0
-   
+   printList("proclist", proc);
    readyQueue = 0;
    printf("init complete\n\r");
 }

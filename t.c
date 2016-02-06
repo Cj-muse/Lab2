@@ -12,7 +12,7 @@ int body(void)
       color = running->pid + 7;
       printf("\rproc %d running : enter a key : ", running->pid);
       c = getc(); 
-      printf("%c\n", c);
+      printf("%c\n\r", c);
 		switch(c)
 		{
 			case 's': tswitch();	break;
@@ -46,8 +46,12 @@ PROC *kfork()
 	
 	p->kstack[SSIZE-1] = (int)body; // resume point=address of body()
 	p->ksp = &p->kstack[SSIZE-9]; // proc saved sp
+
 	enqueue(&readyQueue, p); // enter p into readyQueue by priority
 	printf("kfork(): success\n\r");
+	printList("readyqueue", readyQueue);
+	printList("freeList", freeList);
+
 	return p; 
 }
 int init()
@@ -86,18 +90,29 @@ int init()
    // set up free list  
    freeList = &proc[1];                   // freeList P1->P2->...->P8->0
    printList("proclist", proc);
+	printList("readyqueue", readyQueue);
+	printList("freeList", freeList);
+
    readyQueue = 0;
    printf("init complete\n\r");
 }
 int scheduler()
 {
 	printf("Scheduler\r\n");
+	printList("readyqueue", readyQueue);
+	printList("freeList", freeList);
+
    
 	if (running->status == READY) // if running is still READY
-	{	
+	{
+		printf("entering P%d into readyqueue\r\n", running->pid);
 		enqueue(&readyQueue, running); // enter it into readyQueue
 	}
 	running = dequeue(&readyQueue); // new running
+	printf("Schedualer recived P%d as new proc\n\r", running->pid);
+	printList("readyqueue", readyQueue);
+   printList("freeList", freeList);
+		 
 }
 int main(void)
 {
@@ -108,7 +123,9 @@ int main(void)
    {
       printf("proc 0  running : enter a key : \n\r");
       getc();
-		
+			
+		printList("readyqueue", readyQueue);
+   	printList("freeList", freeList);
 		if (readyQueue)
 		{
 			printf("Tswitch():\n\r");
